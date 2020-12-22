@@ -41,12 +41,24 @@ The function find_smallest_VC() linearly searches for the smallest n by trying a
 
 ## Improvements
 
+### Data reduction rules
+
+Data reduction rules serve the purpose of reducing the input graph by taking "obvious" nodes into the solution.  This makes the graph smaller and the whole algorithm faster. Although the reduction rules give improvement, the overall runningtime is unchanged.
+
+Implemented data reduction rules:
+- Delete Deg-0 vertices
+- Process Deg-1 and Deg-2 vertices
+- Take vertices with Deg-k into the VC, if k is greater than the VC
+- Domination rule
+- Finding Unconfied vertices
+- Deg-3 Independet Set rule
+- Crown rule
+- Linear Program
+
 
 ### Branching
 
-
-### Data reduction rules
-
+Instead of checking for each vertex if it belongs in the VC or not and trying all possibilities recursivly. I take a node <img src="https://render.githubusercontent.com/render/math?math=v \in V"> and either take v into VC or take all the neighbors <img src="https://render.githubusercontent.com/render/math?math=\mathcal{N}(v)"> of v into VC. This improves the branching and thus reduces the running time to ![My Formula](https://latex.codecogs.com/gif.latex?O(n^2(m+{1.47}^k))).
 
 
 
