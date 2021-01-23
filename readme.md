@@ -64,5 +64,34 @@ Instead of checking for each vertex if it belongs in the VC or not and trying al
 
 ## Input/Output
 
-The input is passed to the programm via stdin. Input edge after edge. Inputfiles can be seen in the file "instances"
+The input is passed to the programm via stdin. Input edge after edge. Inputfiles can be seen in the file "instances".
+
+Run with:
+```python3 VC.py < instances/instance1.input```
+
+
+Further settings can be inputted in the commandline:
+```
+ARGS:
+    [0] - frequency of datasreduction rules by recursive depth ("True") or by recursive steps ("False")
+    
+    [1] - search method: either binary search ("sb"), two forms of linear search("sl1" and "sl2") or constrianed branching (anything else as argument)
+    
+    [2] to [6] - settings on how often to use the following datareduction rules: domination rule, crown rule, LP, unconfined vertices, a second preprocessing - arguement is an integer and specifies the frequency
+    
+    [7] - aplly LP exhaustivly - either True or False
+    
+    [8] to [10] - settings on how often to use the following datareduction rules: two-clique rule, two clique degree, degree-3-intependent set rule - - arguement is an integer and specifies the frequency
+    
+    
+    python3 VC.py True sb 1 1 1 1 1 True 1 1 1 < instances/instance1.input # Every rule is applied at every branching step. (Although there is no branching for instance1 and it is soley solved using preprocessing and datareduction rules)
+    
+
+
+
+```
+
+
+
+
 

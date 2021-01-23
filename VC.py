@@ -538,12 +538,7 @@ def main():
     
 
     sys.setrecursionlimit(10000)
-    #G = read_input(sys.stdin)
-    
-    G = read_input(open("../instances/random/001000_000000003000.input", "r"))
-    #G = read_input(open("dimacs/crack.graph.dimacs", "r"))
-    #G = read_input(open("hidden.input", "r"))
-    #G = read_input(open("hidden_complete/hiddenC.dimacs", "r"))
+    G = read_input(sys.stdin)
     
     G_test = copy.deepcopy(G)
 
