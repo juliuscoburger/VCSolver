@@ -10,7 +10,7 @@ from heuristic import heuristic
 from branching import constrained_branching, branch
 
 
-def output_VC(v_list, merge_dict):
+def output_vertex_cover(v_list, merge_dict):
     while len(merge_dict) > 0:
 
         m_v = list(merge_dict.keys())
@@ -183,7 +183,7 @@ def main():
 
     if G["active_nodes"] == 0:
         print('#recursive steps: 0')
-        output_VC(v_list, merge_dict)
+        output_vertex_cover(v_list, merge_dict)
         return
 
     md = merge_dict
@@ -197,7 +197,7 @@ def main():
 
     if G["active_nodes"] == 0:
         print('#recursive steps: 0')
-        output_VC(v_list, merge_dict)
+        output_vertex_cover(v_list, merge_dict)
         return
 
     unc = unconfined(G)
@@ -209,7 +209,7 @@ def main():
 
     if G["active_nodes"] == 0:
         print('#recursive steps: 0')
-        output_VC(v_list, merge_dict)
+        output_vertex_cover(v_list, merge_dict)
         return
 
     # delete all unactive vertices before branching
@@ -285,7 +285,7 @@ def main():
     print("#|VC| =", len(VC))
 
     md.update(merge_dict)
-    output_VC(VC, md)
+    output_vertex_cover(VC, md)
 
 
 settings.init()
