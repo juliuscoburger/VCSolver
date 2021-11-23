@@ -1,27 +1,25 @@
-# Find maximum cardinality matching in general undirected graph
-# D. Eppstein, UC Irvine, 6 Sep 2003
-
 from __future__ import generators
+
 from helps import get_active_neighbors, activeVertices
 
-if 'True' not in globals():
-    globals()['True'] = not None
-    globals()['False'] = not True
 
-
-class unionFind:
-    '''Union Find data structure. Modified from Josiah Carlson's code,
-http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/215912
-to allow arbitrarily many arguments in unions, use [] syntax for finds,
-and eliminate unnecessary code.'''
+class UnionFind:
+    """
+    Union Find data structure. Modified from Josiah Carlson's code,
+    https://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/215912
+    to allow arbitrarily many arguments in unions, use [] syntax for finds,
+    and eliminate unnecessary code.
+    """
 
     def __init__(self):
         self.weights = {}
         self.parents = {}
 
     def __getitem__(self, object):
-        '''Find the root of the set that an object is in.
-Object must be hashable; previously unknown objects become new singleton sets.'''
+        """
+        Find the root of the set that an object is in.
+        Object must be hashable; previously unknown objects become new singleton sets.
+        """
 
         # check for previously unknown object
         if object not in self.parents:
@@ -42,7 +40,9 @@ Object must be hashable; previously unknown objects become new singleton sets.''
         return root
 
     def union(self, *objects):
-        '''Find the sets containing the given objects and merge them all.'''
+        """
+        Find the sets containing the given objects and merge them all.
+        """
         roots = [self[x] for x in objects]
         heaviest = max([(self.weights[r], r) for r in roots])[1]
         for r in roots:
@@ -52,14 +52,16 @@ Object must be hashable; previously unknown objects become new singleton sets.''
 
 
 def matching(G, initialMatching={}):
-    '''Find a maximum cardinality matching in a graph G.
-G is represented in modified GvR form: iter(G) lists its vertices;
-iter(G[v]) lists the neighbors of v; w in G[v] tests adjacency.
-The output is a dictionary mapping vertices to their matches;
-unmatched vertices are omitted from the dictionary.
+    """
+    Find a maximum cardinality matching in a graph G.
+    G is represented in modified GvR form: iter(G) lists its vertices;
+    iter(G[v]) lists the neighbors of v; w in G[v] tests adjacency.
+    The output is a dictionary mapping vertices to their matches;
+    unmatched vertices are omitted from the dictionary.
 
-We use Edmonds' blossom-contraction algorithm, as described e.g.
-in Galil's 1986 Computing Surveys paper.'''
+    We use Edmonds' blossom-contraction algorithm, as described e.g.
+    in Galil's 1986 Computing Surveys paper.
+    """
 
     # Copy initial matching so we can use it nondestructively
     matching = {}
@@ -69,53 +71,31 @@ in Galil's 1986 Computing Surveys paper.'''
     # Form greedy matching to avoid some iterations of augmentation
     for v in activeVertices(G):
         if v not in matching:
-            for w in get_active_neighbors(G,v):
+            for w in get_active_neighbors(G, v):
                 if w not in matching:
                     matching[v] = w
                     matching[w] = v
                     break
 
     def augment():
-        '''Search for a single augmenting path.
-Return value is true if the matching size was increased, false otherwise.'''
-
-        # Data structures for augmenting path search:
-        #
-        # leader: union-find structure; the leader of a blossom is one
-        # of its vertices (not necessarily topmost), and leader[v] always
-        # points to the leader of the largest blossom containing v
-        #
-        # S: dictionary of leader at even levels of the structure tree.
-        # Dictionary keys are names of leader (as returned by the union-find
-        # data structure) and values are the structure tree parent of the blossom
-        # (a T-node, or the top vertex if the blossom is a root of a structure tree).
-        #
-        # T: dictionary of vertices at odd levels of the structure tree.
-        # Dictionary keys are the vertices; T[x] is a vertex with an unmatched
-        # edge to x.  To find the parent in the structure tree, use leader[T[x]].
-        #
-        # unexplored: collection of unexplored vertices within leader of S
-        #
-        # base: if x was originally a T-vertex, but becomes part of a blossom,
-        # base[t] will be the pair (v,w) at the base of the blossom, where v and t
-        # are on the same side of the blossom and w is on the other side.
-
-        leader = unionFind()
+        """
+        Search for a single augmenting path.
+        Return value is true if the matching size was increased, false otherwise.
+        """
+        leader = UnionFind()
         S = {}
         T = {}
         unexplored = []
         base = {}
 
-        # Subroutines for augmenting path search.
-        # Many of these are called only from one place, but are split out
-        # as subroutines to improve modularization and readability.
-
         def blossom(v, w, a):
-            '''Create a new blossom from edge v-w with common ancestor a.'''
+            """
+            Create a new blossom from edge v-w with common ancestor a.
+            """
 
             def findSide(v, w):
                 path = [leader[v]]
-                b = (v, w)   # new base for all T nodes found on the path
+                b = (v, w)  # new base for all T nodes found on the path
                 while path[-1] != a:
                     tnode = S[path[-1]]
                     path.append(tnode)
@@ -124,7 +104,7 @@ Return value is true if the matching size was increased, false otherwise.'''
                     path.append(leader[T[tnode]])
                 return path
 
-            a = leader[a]   # sanity check
+            a = leader[a]  # sanity check
             path1, path2 = findSide(v, w), findSide(w, v)
             leader.union(*path1)
             leader.union(*path2)
@@ -132,57 +112,67 @@ Return value is true if the matching size was increased, false otherwise.'''
 
         topless = object()  # should be unequal to any graph vertex
 
-        def alternatingPath(start, goal=topless):
-            '''Return sequence of vertices on alternating path from start to goal.
-Goal must be a T node along the path from the start to the root of the structure tree.
-If goal is omitted, we find an alternating path to the structure tree root.'''
+        def alternating_path(start, goal=topless):
+            """
+            Return sequence of vertices on alternating path from start to goal.
+            Goal must be a T node along the path from the start to the root of the structure tree.
+            If goal is omitted, we find an alternating path to the structure tree root.
+            """
             path = []
             while 1:
                 while start in T:
                     v, w = base[start]
-                    vs = alternatingPath(v, start)
+                    vs = alternating_path(v, start)
                     vs.reverse()
                     path += vs
                     start = w
                 path.append(start)
                 if start not in matching:
-                    return path     # reached top of structure tree, done!
+                    return path  # reached top of structure tree, done!
                 tnode = matching[start]
                 path.append(tnode)
                 if tnode == goal:
-                    return path     # finished recursive subpath
+                    return path  # finished recursive subpath
                 start = T[tnode]
 
         def pairs(L):
-            '''Utility to partition list into pairs of items.
-If list has odd length, the final pair is omitted silently.'''
+            """
+            Utility to partition list into pairs of items.
+            If list has odd length, the final pair is omitted silently.
+            """
             i = 0
             while i < len(L) - 1:
-                yield L[i], L[i+1]
+                yield L[i], L[i + 1]
                 i += 2
 
         def alternate(v):
-            '''Make v unmatched by alternating the path to the root of its structure tree.'''
-            path = alternatingPath(v)
+            """
+            Make v unmatched by alternating the path to the root of its structure tree.
+            """
+            path = alternating_path(v)
             path.reverse()
             for x, y in pairs(path):
                 matching[x] = y
                 matching[y] = x
 
-        def addMatch(v, w):
-            '''Here with an S-S edge vw connecting vertices in different structure trees.
-Find the corresponding augmenting path and use it to augment the matching.'''
+        def add_match(v, w):
+            """
+            Here with an S-S edge vw connecting vertices in different structure trees.
+            Find the corresponding augmenting path and use it to augment the matching.
+            """
             alternate(v)
             alternate(w)
             matching[v] = w
             matching[w] = v
 
         def ss(v, w):
-            '''Handle detection of an S-S edge in augmenting path search.
-Like augment(), returns true iff the matching size was increased.'''
+            """
+            Handle detection of an S-S edge in augmenting path search.
+            Like augment(), returns true iff the matching size was increased.
+            """
 
             if leader[v] == leader[w]:
-                return False        # self-loop within blossom, ignore
+                return False  # self-loop within blossom, ignore
 
             # parallel search up two branches of structure tree
             # until we find a common ancestor of v and w
@@ -193,7 +183,7 @@ Like augment(), returns true iff the matching size was increased.'''
                 head = leader[head]
                 parent = leader[S[head]]
                 if parent == head:
-                    return head     # found root of structure tree
+                    return head  # found root of structure tree
                 path[head] = parent
                 path[parent] = leader[T[parent]]
                 return path[parent]
@@ -207,7 +197,7 @@ Like augment(), returns true iff the matching size was increased.'''
                     return False
 
                 if leader[S[head1]] == head1 and leader[S[head2]] == head2:
-                    addMatch(v, w)
+                    add_match(v, w)
                     return True
 
                 if head1 in path2:
@@ -225,90 +215,81 @@ Like augment(), returns true iff the matching size was increased.'''
                 S[v] = v
                 unexplored.append(v)
 
-        current = 0     # index into unexplored, in FIFO order so we get short paths
+        current = 0  # index into unexplored, in FIFO order so we get short paths
         while current < len(unexplored):
             v = unexplored[current]
             current += 1
 
-            for w in get_active_neighbors(G,v):
+            for w in get_active_neighbors(G, v):
                 if leader[w] in S:  # S-S edge: blossom or augmenting path
                     if ss(v, w):
                         return True
 
-                elif w not in T:    # previously unexplored node, add as T-node
+                elif w not in T:  # previously unexplored node, add as T-node
                     T[w] = v
                     u = matching[w]
                     if leader[u] not in S:
-                        S[u] = w    # and add its match as an S-node
+                        S[u] = w  # and add its match as an S-node
                         unexplored.append(u)
+        return False
 
-        return False    # ran out of graph without finding an augmenting path
-
-    # augment the matching until it is maximum
     while augment():
         pass
 
     return matching
 
 
-#http://code.activestate.com/recipes/123641-hopcroft-karp-bipartite-matching/
-def bipartiteMatch(graph):
-    '''Find maximum cardinality matching of a bipartite graph (U,V,E).
+def bipartite_match(graph):
+    """
+    https://code.activestate.com/recipes/123641-hopcroft-karp-bipartite-matching/
+
+    Find maximum cardinality matching of a bipartite graph (U,V,E).
     The input format is a dictionary mapping members of U to a list
     of their neighbors in V.  The output is a triple (M,A,B) where M is a
     dictionary mapping members of V to their matches in U, A is the part
     of the maximum independent set in U, and B is the part of the MIS in V.
     The same object may occur in both U and V, and is treated as two
-    distinct vertices if this happens.'''
-    
-    # initialize greedy matching (redundant, but faster than full search)
+    distinct vertices if this happens.
+    """
     matching = {}
     for u in graph:
         for v in graph[u]:
             if v not in matching:
                 matching[v] = u
                 break
-    
+
     while 1:
-        # structure residual graph into layers
-        # pred[u] gives the neighbor in the previous layer for u in U
-        # preds[v] gives a list of neighbors in the previous layer for v in V
-        # unmatched gives a list of unmatched vertices in final layer of V,
-        # and is also used as a flag value for pred[u] when u is in the first layer
         preds = {}
         unmatched = []
-        pred = dict([(u,unmatched) for u in graph])
+        pred = dict([(u, unmatched) for u in graph])
         for v in matching:
             del pred[matching[v]]
         layer = list(pred)
-        
+
         # repeatedly extend layering structure by another pair of layers
         while layer and not unmatched:
-            newLayer = {}
+            new_layer = {}
             for u in layer:
                 for v in graph[u]:
                     if v not in preds:
-                        newLayer.setdefault(v,[]).append(u)
+                        new_layer.setdefault(v, []).append(u)
             layer = []
-            for v in newLayer:
-                preds[v] = newLayer[v]
+            for v in new_layer:
+                preds[v] = new_layer[v]
                 if v in matching:
                     layer.append(matching[v])
                     pred[matching[v]] = v
                 else:
                     unmatched.append(v)
-        
-        # did we finish layering without finding any alternating paths?
+
         if not unmatched:
             unlayered = {}
             for u in graph:
                 for v in graph[u]:
                     if v not in preds:
                         unlayered[v] = None
-            return (matching,list(pred),list(unlayered))
+            return matching, list(pred), list(unlayered)
 
-        # recursively search backward through layers to find alternating paths
-        # recursion returns true if found path, false otherwise
         def recurse(v):
             if v in preds:
                 L = preds[v]
@@ -322,4 +303,5 @@ def bipartiteMatch(graph):
                             return 1
             return 0
 
-        for v in unmatched: recurse(v)
+        for v in unmatched:
+            recurse(v)

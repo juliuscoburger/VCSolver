@@ -1,20 +1,26 @@
 from helps import activeVertices
 
 
-#neighbors is only set when needed
-#if neighbors is set, then only compute cc of neighbors
-def clique_cover(G, neighbors=None):
+def clique_cover(graph: dict, neighbors=None) -> list:
+    """
+    Neighbors are only set if needed, if set, 
+    then only compute the clique cover of neighbors.
+    
+    :param graph:
+    :param neighbors:
+    :return: return list of cliques
+    """
     cliques = []
     inserted = []
 
-    if neighbors == None:
-        to_analyze = activeVertices(G)
+    if neighbors is None:
+        to_analyze = activeVertices(graph)
     else:
         to_analyze = neighbors
 
     for v in to_analyze:
         for c in cliques:
-            if set(c).issubset(set(G["vertices"][v]["neighbors"])):
+            if set(c).issubset(set(graph["vertices"][v]["neighbors"])):
                 c.append(v)
                 inserted.append(v)
                 break
